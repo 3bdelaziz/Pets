@@ -32,31 +32,30 @@ public class PetProvider extends ContentProvider {
     public static final String LOG_TAG = PetProvider.class.getSimpleName();
     private static final int PETS = 100;
     private static final int PET_ID = 101;
-    private static final UriMatcher sUriMatcher = new UriMatcher(UriMatcher.NO_MATCH);
+    private static final UriMatcher URI_MATCHER = new UriMatcher(UriMatcher.NO_MATCH);
 
     static {
-        sUriMatcher.addURI(PetContract.CONTENT_AUTHORITY, PetContract.PATH_PETS, PETS);
-        sUriMatcher.addURI(PetContract.CONTENT_AUTHORITY, PetContract.PATH_PETS + "/#", PET_ID);
+        URI_MATCHER.addURI(PetContract.CONTENT_AUTHORITY, PetContract.PATH_PETS, PETS);
+        URI_MATCHER.addURI(PetContract.CONTENT_AUTHORITY, PetContract.PATH_PETS + "/#", PET_ID);
     }
 
-    private PetDbHelper mDbHelper;
+    private PetDbHelper mPetDbHelper;
 
     @Override
     public boolean onCreate() {
-        mDbHelper = new PetDbHelper(getContext());
+        mPetDbHelper = new PetDbHelper(getContext());
         return true;
     }
 
     @Override
     public Cursor query(Uri uri, String[] projection, String selection, String[] selectionArgs, String sortOrder) {
-        SQLiteDatabase database = mDbHelper.getReadableDatabase();
+        SQLiteDatabase database = mPetDbHelper.getReadableDatabase();
         Cursor cursor;
 
-        int match = sUriMatcher.match(uri);
+        int match = URI_MATCHER.match(uri);
         switch (match) {
             case PETS:
-                cursor = database.query(PetEntry.TABLE_NAME, projection, selection, selectionArgs,
-                        null, null, sortOrder);
+                cursor = database.query(PetEntry.TABLE_NAME, projection, selection, selectionArgs, null, null, sortOrder);
                 break;
             case PET_ID:
                 selection = PetEntry._ID + "=?";
@@ -73,7 +72,7 @@ public class PetProvider extends ContentProvider {
 
     @Override
     public Uri insert(Uri uri, ContentValues contentValues) {
-        final int match = sUriMatcher.match(uri);
+        final int match = URI_MATCHER.match(uri);
         switch (match) {
             case PETS:
                 return insertPet(uri, contentValues);
@@ -98,7 +97,7 @@ public class PetProvider extends ContentProvider {
             throw new IllegalArgumentException("Pet requires valid weight");
         }
 
-        SQLiteDatabase database = mDbHelper.getWritableDatabase();
+        SQLiteDatabase database = mPetDbHelper.getWritableDatabase();
 
         long id = database.insert(PetEntry.TABLE_NAME, null, values);
         if (id == -1) {
@@ -113,7 +112,7 @@ public class PetProvider extends ContentProvider {
 
     @Override
     public int update(Uri uri, ContentValues contentValues, String selection, String[] selectionArgs) {
-        final int match = sUriMatcher.match(uri);
+        final int match = URI_MATCHER.match(uri);
         switch (match) {
             case PETS:
                 return updatePet(uri, contentValues, selection, selectionArgs);
@@ -152,7 +151,7 @@ public class PetProvider extends ContentProvider {
             return 0;
         }
 
-        SQLiteDatabase database = mDbHelper.getWritableDatabase();
+        SQLiteDatabase database = mPetDbHelper.getWritableDatabase();
 
         int rowsUpdated = database.update(PetEntry.TABLE_NAME, values, selection, selectionArgs);
 
@@ -165,10 +164,10 @@ public class PetProvider extends ContentProvider {
 
     @Override
     public int delete(Uri uri, String selection, String[] selectionArgs) {
-        SQLiteDatabase database = mDbHelper.getWritableDatabase();
+        SQLiteDatabase database = mPetDbHelper.getWritableDatabase();
         int rowsDeleted;
 
-        final int match = sUriMatcher.match(uri);
+        final int match = URI_MATCHER.match(uri);
         switch (match) {
             case PETS:
                 rowsDeleted = database.delete(PetEntry.TABLE_NAME, selection, selectionArgs);
@@ -191,7 +190,7 @@ public class PetProvider extends ContentProvider {
 
     @Override
     public String getType(Uri uri) {
-        final int match = sUriMatcher.match(uri);
+        final int match = URI_MATCHER.match(uri);
         switch (match) {
             case PETS:
                 return PetEntry.CONTENT_LIST_TYPE;

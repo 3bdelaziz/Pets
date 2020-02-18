@@ -34,25 +34,25 @@ public class PetCursorAdapter extends CursorAdapter {
 
     @Override
     public View newView(Context context, Cursor cursor, ViewGroup parent) {
-        return LayoutInflater.from(context).inflate(R.layout.list_item, parent, false);
+        return LayoutInflater.from(context).inflate(R.layout.list_pets, parent, false);
     }
 
     @Override
     public void bindView(View view, Context context, Cursor cursor) {
-        TextView nameTextView = view.findViewById(R.id.name);
-        TextView summaryTextView = view.findViewById(R.id.summary);
+        TextView petNameTextView = view.findViewById(R.id.pet_name);
+        TextView petBreedTextView = view.findViewById(R.id.pet_breed);
 
-        int nameColumnIndex = cursor.getColumnIndex(PetEntry.COLUMN_PET_NAME);
-        int breedColumnIndex = cursor.getColumnIndex(PetEntry.COLUMN_PET_BREED);
+        int petNameColumnIndex = cursor.getColumnIndex(PetEntry.COLUMN_PET_NAME);
+        int petBreedColumnIndex = cursor.getColumnIndex(PetEntry.COLUMN_PET_BREED);
 
-        String petName = cursor.getString(nameColumnIndex);
-        String petBreed = cursor.getString(breedColumnIndex);
+        String petName = cursor.getString(petNameColumnIndex);
+        String petBreed = cursor.getString(petBreedColumnIndex);
 
         if (TextUtils.isEmpty(petBreed)) {
             petBreed = context.getString(R.string.unknown_breed);
         }
 
-        nameTextView.setText(petName);
-        summaryTextView.setText(petBreed);
+        petNameTextView.setText(petName);
+        petBreedTextView.setText(petBreed);
     }
 }

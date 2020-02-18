@@ -8,7 +8,7 @@
     tools:context=".CatalogActivity">
 
     <ListView
-        android:id="@+id/list"
+        android:id="@+id/list_pets"
         android:layout_width="match_parent"
         android:layout_height="match_parent" />
 
@@ -20,17 +20,17 @@
         android:layout_centerInParent="true">
 
         <ImageView
-            android:id="@+id/empty_shelter_image"
+            android:id="@+id/image_empty_shelter"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_centerHorizontal="true"
             android:src="@drawable/ic_empty_shelter" />
 
         <TextView
-            android:id="@+id/empty_title_text"
+            android:id="@+id/text_empty_title"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_below="@+id/empty_shelter_image"
+            android:layout_below="@+id/image_empty_shelter"
             android:layout_centerHorizontal="true"
             android:fontFamily="sans-serif-medium"
             android:paddingTop="16dp"
@@ -38,10 +38,10 @@
             android:textAppearance="?android:textAppearanceMedium" />
 
         <TextView
-            android:id="@+id/empty_subtitle_text"
+            android:id="@+id/text_empty_subtitle"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_below="@+id/empty_title_text"
+            android:layout_below="@+id/text_empty_title"
             android:layout_centerHorizontal="true"
             android:fontFamily="sans-serif"
             android:paddingTop="8dp"

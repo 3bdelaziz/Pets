@@ -15,10 +15,12 @@
  */
 package com.example.android.pets;
 
-import android.app.LoaderManager;
+import android.app.AlertDialog;
+import android.app.LoaderManager.LoaderCallbacks;
 import android.content.ContentUris;
 import android.content.ContentValues;
 import android.content.CursorLoader;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.Loader;
 import android.database.Cursor;
@@ -32,14 +34,15 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ListView;
+import android.widget.Toast;
 
 import com.example.android.pets.data.PetContract.PetEntry;
 
-public class CatalogActivity extends AppCompatActivity implements
-        LoaderManager.LoaderCallbacks<Cursor> {
+public class CatalogActivity extends AppCompatActivity implements LoaderCallbacks<Cursor> {
 
     private static final int PET_LOADER = 0;
-    PetCursorAdapter mCursorAdapter;
+    private PetCursorAdapter mPetCursorAdapter;
+    private Uri mCurrentPetUri;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -55,21 +58,29 @@ public class CatalogActivity extends AppCompatActivity implements
             }
         });
 
-        ListView petListView = (ListView) findViewById(R.id.list);
+        ListView petListView = (ListView) findViewById(R.id.list_pets);
         View emptyView = findViewById(R.id.empty_view);
         petListView.setEmptyView(emptyView);
 
-
-        mCursorAdapter = new PetCursorAdapter(this, null);
-        petListView.setAdapter(mCursorAdapter);
+        mPetCursorAdapter = new PetCursorAdapter(this, null);
+        petListView.setAdapter(mPetCursorAdapter);
 
         petListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int position, long id) {
                 Intent intent = new Intent(CatalogActivity.this, EditorActivity.class);
-                Uri currentPetUri = ContentUris.withAppendedId(PetEntry.CONTENT_URI, id);
-                intent.setData(currentPetUri);
+                mCurrentPetUri = ContentUris.withAppendedId(PetEntry.CONTENT_URI, id);
+                intent.setData(mCurrentPetUri);
                 startActivity(intent);
+            }
+        });
+
+        petListView.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
+            @Override
+            public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
+                mCurrentPetUri = ContentUris.withAppendedId(PetEntry.CONTENT_URI, id);
+                showDeleteConfirmationDialog();
+                return false;
             }
         });
 
@@ -117,21 +128,54 @@ public class CatalogActivity extends AppCompatActivity implements
                 PetEntry.COLUMN_PET_NAME,
                 PetEntry.COLUMN_PET_BREED};
 
-        return new CursorLoader(this,   // Parent activity context
-                PetEntry.CONTENT_URI,   // Provider content URI to query
-                projection,             // Columns to include in the resulting Cursor
-                null,                   // No selection clause
-                null,                   // No selection arguments
-                null);                  // Default sort order
+        return new CursorLoader(this,
+                PetEntry.CONTENT_URI,
+                projection,
+                null,
+                null,
+                null);
     }
 
     @Override
     public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
-        mCursorAdapter.swapCursor(data);
+        mPetCursorAdapter.swapCursor(data);
     }
 
     @Override
     public void onLoaderReset(Loader<Cursor> loader) {
-        mCursorAdapter.swapCursor(null);
+        mPetCursorAdapter.swapCursor(null);
+    }
+
+    private void showDeleteConfirmationDialog() {
+
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setMessage(R.string.delete_dialog_msg);
+        builder.setPositiveButton(R.string.delete, new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int id) {
+                deletePet();
+            }
+        });
+        builder.setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int id) {
+
+                if (dialog != null) {
+                    dialog.dismiss();
+                }
+            }
+        });
+
+        AlertDialog alertDialog = builder.create();
+        alertDialog.show();
+    }
+
+    private void deletePet() {
+        if (mCurrentPetUri != null) {
+            int rowsDeleted = getContentResolver().delete(mCurrentPetUri, null, null);
+            if (rowsDeleted == 0) {
+                Toast.makeText(this, getString(R.string.editor_delete_pet_failed), Toast.LENGTH_SHORT).show();
+            } else {
+                Toast.makeText(this, getString(R.string.editor_delete_pet_successful), Toast.LENGTH_SHORT).show();
+            }
+        }
     }
 }
